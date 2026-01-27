@@ -4,7 +4,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
+
+const clerkAuthRoutes = require('./routes/clerkAuth');
+const { authenticateWithClerk } = require('./middleware/clerkAuthMiddleware');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -15,6 +19,9 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -51,7 +58,8 @@ mongoose.connect(MONGODB_URI, {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/clerk', clerkAuthRoutes);
+app.use('/api/orders', authenticateWithClerk, orderRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
@@ -62,6 +70,14 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });
+});
+
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: 'API endpoint not found' });
+  } else {
+    res.sendFile(path.join(__dirname, '../frontend/index.html')); // 💥 path undefined
+  }
 });
 
 // Serve static files (frontend)

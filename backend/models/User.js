@@ -76,7 +76,17 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: Date.now
+  },
+
+  
+  clerkUserId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
   }
+
+  
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

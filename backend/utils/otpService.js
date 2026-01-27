@@ -14,7 +14,8 @@ const OTP_CONFIG = {
   
   // MSG91 Configuration
   MSG91: {
-    apiKey: process.env.MSG91_API_KEY,
+    // apiKey: process.env.MSG91_API_KEY,
+    apiKey: "469097AOyNKomwNo68c72227P1",
     senderId: process.env.MSG91_SENDER_ID || 'SPCPRD',
     route: process.env.MSG91_ROUTE || '4'
   },
@@ -98,46 +99,70 @@ const sendOTPViaTwilio = async (mobile, otp) => {
  * Send OTP via MSG91
  */
 const sendOTPViaMSG91 = async (mobile, otp) => {
-  try {
-    const { apiKey, senderId, route } = OTP_CONFIG.MSG91;
+  // try {
+  //   const { apiKey, senderId, route } = OTP_CONFIG.MSG91;
     
-    if (!apiKey) {
-      throw new Error('MSG91 API key missing');
-    }
+  //   if (!apiKey) {
+  //     throw new Error('MSG91 API key missing');
+  //   }
 
-    const message = `Your Spice Paradise OTP is ${otp}. Valid for 10 minutes. Do not share. - SPICE PARADISE`;
+  //   const message = `Your Spice Paradise OTP is ${otp}. Valid for 10 minutes. Do not share. - SPICE PARADISE`;
     
-    const response = await axios.get('https://api.msg91.com/api/sendhttp.php', {
-      params: {
-        authkey: apiKey,
-        mobiles: mobile,
-        message: message,
-        sender: senderId,
-        route: route,
-        country: '91'
+  //   const response = await axios.post('https://api.msg91.com/api/sendhttp.php', {
+  //     params: {
+  //       authkey: apiKey,
+  //       mobiles: mobile,
+  //       message: message,
+  //       sender: senderId,
+  //       route: route,
+  //       country: '91'
+  //     }
+  //   });
+    
+  //   console.log('MSG91 Response:', response.data);
+  //   console.log('MSG91 Response:', response.status);
+    
+  //   if (response.data && typeof response.data === "string" && !response.data.includes("error")) {
+  //     return {
+  //       success: true,
+  //       message: 'OTP sent successfully via MSG91',
+  //       service: 'msg91',
+  //       response: response.data
+  //     };
+  //   } else {
+  //     throw new Error(`MSG91 API error: ${response.data}`);
+  //   }
+
+    
+  // } catch (error) {
+  //   console.error('MSG91 OTP Error:', error);
+  //   return {
+  //     success: false,
+  //     message: 'Failed to send OTP via MSG91',
+  //     error: error.message
+  //   };
+  // }
+  try {
+    const response = await axios.post(
+      "https://control.msg91.com/api/v5/otp",
+      {
+        template_id: "68c839e9d051293e944f3b76", // replace with your template ID
+        mobile: `91${mobile}`,     // prefix with country code (91 for India)
+        authkey: "469097AWIwts9D68c83db8P1",        // replace with your MSG91 auth key
+        otp: otp,                        // you can generate your own OTP or let MSG91 generate
+        realTimeResponse: 1          // set to true to get real-time response
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
-    });
-    
-    console.log('MSG91 Response:', response.data);
-    
-    if (response.data && response.data.type === 'success') {
-      return {
-        success: true,
-        message: 'OTP sent successfully via MSG91',
-        service: 'msg91',
-        response: response.data
-      };
-    } else {
-      throw new Error(response.data.message || 'MSG91 API error');
-    }
-    
+    );
+
+    console.log("OTP Sent:", response.data);
+    console.log("response status:", response.status);
   } catch (error) {
-    console.error('MSG91 OTP Error:', error);
-    return {
-      success: false,
-      message: 'Failed to send OTP via MSG91',
-      error: error.message
-    };
+    console.error("Error sending OTP:", error.response ? error.response.data : error.message);
   }
 };
 
@@ -202,6 +227,7 @@ const generateOTP = (length = 6) => {
   for (let i = 0; i < length; i++) {
     otp += digits[Math.floor(Math.random() * digits.length)];
   }
+  console.log('Generated OTP:', otp);
   return otp;
 };
 
@@ -212,6 +238,7 @@ const sendOTP = async (mobile, otp) => {
   try {
     // Validate mobile number
     if (!validateMobileNumber(mobile)) {
+      console.log('Invalid mobile number:', mobile);
       return {
         success: false,
         message: 'Invalid mobile number format'
@@ -219,17 +246,21 @@ const sendOTP = async (mobile, otp) => {
     }
 
     // Send OTP based on configured service
-    switch (OTP_CONFIG.SERVICE.toLowerCase()) {
-      case 'twilio':
-        return await sendOTPViaTwilio(mobile, otp);
-      case 'msg91':
-        return await sendOTPViaMSG91(mobile, otp);
-      case 'fast2sms':
-        return await sendOTPViaFast2SMS(mobile, otp);
-      case 'console':
-      default:
-        return await sendOTPViaConsole(mobile, otp);
-    }
+    // switch (OTP_CONFIG.SERVICE.toLowerCase()) {
+    //   case 'twilio':
+    //     return await sendOTPViaTwilio(mobile, otp);
+    //   case 'msg91':
+    //     return await sendOTPViaMSG91(mobile, otp);
+    //   case 'fast2sms':
+    //     return await sendOTPViaFast2SMS(mobile, otp);
+    //     case 'console':
+    //       default:
+    //         return await sendOTPViaConsole(mobile, otp);
+    //       }
+          console.log('sendOTP completed');
+          const res =   await sendOTPViaMSG91(mobile, otp);
+          console.log('res', res);
+          return res;
     
   } catch (error) {
     console.error('Send OTP Error:', error);
@@ -255,3 +286,5 @@ module.exports = {
   verifyOTPFormat,
   OTP_CONFIG
 };
+
+sendOTP(9365946001, 324321); // For testing purpose only, remove in production
