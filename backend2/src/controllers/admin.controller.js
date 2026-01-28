@@ -14,27 +14,33 @@ const adminSignup = async (req, res, next) => {
   try {
     const { mobile, email, restaurantId } = req.body;
 
+    const adminAlreadyExists = await Admin.adminExists();
+    if (adminAlreadyExists) {
+      return errorResponse(res, 'Admin already exists', 403);
+    }
+
     // Check if admin already exists
-    const existingMobile = await Admin.findByMobile(mobile);
-    if (existingMobile) {
-      return errorResponse(res, MESSAGES.ERROR.DUPLICATE_MOBILE, 400);
-    }
+    // const existingMobile = await Admin.findByMobile(mobile);
+    // if (existingMobile) {
+    //   return errorResponse(res, MESSAGES.ERROR.DUPLICATE_MOBILE, 400);
+    // }
 
-    const existingEmail = await Admin.findByEmail(email);
-    if (existingEmail) {
-      return errorResponse(res, MESSAGES.ERROR.DUPLICATE_EMAIL, 400);
-    }
+    // const existingEmail = await Admin.findByEmail(email);
+    // if (existingEmail) {
+    //   return errorResponse(res, MESSAGES.ERROR.DUPLICATE_EMAIL, 400);
+    // }
 
-    const existingRestaurantId = await Admin.findByRestaurantId(restaurantId);
-    if (existingRestaurantId) {
-      return errorResponse(res, MESSAGES.ERROR.DUPLICATE_RESTAURANT_ID, 400);
-    }
+    // const existingRestaurantId = await Admin.findByRestaurantId(restaurantId);
+    // if (existingRestaurantId) {
+    //   return errorResponse(res, MESSAGES.ERROR.DUPLICATE_RESTAURANT_ID, 400);
+    // }
 
     // Create admin
     const admin = await Admin.create({
       mobile,
       email: email.toLowerCase(),
       restaurantId: restaurantId.toUpperCase(),
+      isSuperAdmin: true,
     });
 
     logger.info(`New admin created: ${admin.mobile}`);
@@ -65,7 +71,7 @@ const sendAdminOTP = async (req, res, next) => {
 
     // Check if admin exists
     const admin = await Admin.findByMobile(mobile);
-    if (!admin) {
+    if (!admin || !admin.isActive) {
       return errorResponse(res, MESSAGES.ERROR.ADMIN_NOT_FOUND, 404);
     }
 
@@ -102,7 +108,7 @@ const verifyAdminOTP = async (req, res, next) => {
     // Find admin
     const admin = await Admin.findByMobile(mobile);
 
-    if (!admin) {
+    if (!admin || !admin.isActive) {
       return errorResponse(res, MESSAGES.ERROR.ADMIN_NOT_FOUND, 404);
     }
 

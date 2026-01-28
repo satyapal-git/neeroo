@@ -58,17 +58,21 @@ adminSchema.methods.updateLastLogin = function () {
 
 // Static method to find by mobile
 adminSchema.statics.findByMobile = function (mobile) {
-  return this.findOne({ mobile, isActive: true });
+  return this.findOne({ mobile });
 };
 
 // Static method to find by email
 adminSchema.statics.findByEmail = function (email) {
-  return this.findOne({ email: email.toLowerCase(), isActive: true });
+  return this.findOne({ email: email.toLowerCase() });
 };
 
 // Static method to find by restaurant ID
 adminSchema.statics.findByRestaurantId = function (restaurantId) {
-  return this.findOne({ restaurantId: restaurantId.toUpperCase(), isActive: true });
+  return this.findOne({ restaurantId: restaurantId.toUpperCase() });
+};
+
+adminSchema.statics.adminExists = function () {
+  return this.exists({});
 };
 
 const Admin = mongoose.model('Admin', adminSchema);
