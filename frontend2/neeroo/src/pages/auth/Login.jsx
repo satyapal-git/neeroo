@@ -47,21 +47,32 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const data = await authService.verifyUserOTP(mobile, otp);
+      const response = await authService.verifyUserOTP(mobile, otp);
+      
+      console.log('API Response:', response); // Debug log
+      
+      // Backend returns: { success, message, data: { token, user } }
+      // So we need to access response.data
+      const { token, user } = response.data;
+      
+      console.log('Token:', token); // Debug log
+      console.log('User:', user); // Debug log
       
       // Check if user exists and has name
-      if (data.user && data.user.name) {
-        // User exists, login directly
-        login(data.token, USER_ROLE.USER, data.user);
+      if (user && user.name) {
+        // User exists with name, login directly
+        login(token, USER_ROLE.USER, user);
         toast.success('Login successful!');
         navigate('/menu');
       } else {
-        // New user, redirect to user details page
-        login(data.token, USER_ROLE.USER, data.user);
+        // New user or user without name
+        login(token, USER_ROLE.USER, user);
+        toast.success('Please complete your profile');
         navigate('/user-details');
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error('Login Error:', error); // Debug log
+      toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }

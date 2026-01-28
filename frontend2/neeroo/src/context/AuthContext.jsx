@@ -18,18 +18,38 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('authToken');
       const userRole = localStorage.getItem('userRole');
+      const userMobile = localStorage.getItem('userMobile');
+      const userName = localStorage.getItem('userName');
       
-      if (token && userRole) {
+      if (token && userRole && userMobile) {
         setIsAuthenticated(true);
         setRole(userRole);
         
-        // Fetch user profile
-        if (userRole === USER_ROLE.USER) {
-          const data = await authService.getUserProfile();
-          setUser(data.user);
-        } else if (userRole === USER_ROLE.ADMIN) {
-          const data = await authService.getAdminProfile();
-          setUser(data.admin);
+        // Set user from localStorage first (for immediate display)
+        setUser({
+          mobile: userMobile,
+          name: userName || null,
+        });
+        
+        // Then fetch fresh data from API
+        try {
+          if (userRole === USER_ROLE.USER) {
+            const response = await authService.getUserProfile();
+            // Backend returns: { success, message, data: { user } }
+            const userData = response.data?.user || response.user;
+            if (userData) {
+              setUser(userData);
+            }
+          } else if (userRole === USER_ROLE.ADMIN) {
+            const response = await authService.getAdminProfile();
+            const adminData = response.data?.admin || response.admin;
+            if (adminData) {
+              setUser(adminData);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch profile:', error);
+          // Keep using localStorage data if API fails
         }
       }
     } catch (error) {
@@ -41,21 +61,51 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (token, userRole, userData) => {
-    authService.setAuthData(token, userRole, userData.mobile, userData.name);
+    console.log('Login called with:', { token, userRole, userData }); // Debug
+    
+    // Save to localStorage
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userRole', userRole);
+    localStorage.setItem('userMobile', userData.mobile);
+    
+    if (userData.name) {
+      localStorage.setItem('userName', userData.name);
+    } else {
+      localStorage.removeItem('userName'); // Remove if no name
+    }
+    
+    // Update state
     setUser(userData);
     setRole(userRole);
     setIsAuthenticated(true);
+    
+    console.log('User state set:', userData); // Debug
   };
 
   const logout = () => {
-    authService.logout();
+    // Clear localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userMobile');
+    localStorage.removeItem('userName');
+    
+    // Clear state
     setUser(null);
     setRole(null);
     setIsAuthenticated(false);
   };
 
   const updateUser = (userData) => {
-    setUser(prev => ({ ...prev, ...userData }));
+    const updatedUser = { ...user, ...userData };
+    setUser(updatedUser);
+    
+    // Update localStorage
+    if (userData.mobile) {
+      localStorage.setItem('userMobile', userData.mobile);
+    }
+    if (userData.name) {
+      localStorage.setItem('userName', userData.name);
+    }
   };
 
   const value = {

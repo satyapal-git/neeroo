@@ -12,6 +12,10 @@ const Navbar = () => {
   const { unreadCount } = useNotifications();
   const cartCount = getCartCount();
 
+  // Get user data from localStorage if context is empty
+  const userName = user?.name || localStorage.getItem('userName') || '';
+  const userMobile = user?.mobile || localStorage.getItem('userMobile') || '';
+
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,7 +60,9 @@ const Navbar = () => {
               className="flex items-center gap-2 text-gray-700 hover:text-primary-600 transition-colors"
             >
               <User size={24} />
-              <span className="font-semibold hidden sm:inline">{user?.name || user?.mobile}</span>
+              <span className="font-semibold hidden sm:inline">
+                {userName || userMobile || 'User'}
+              </span>
             </Link>
           </div>
         </div>

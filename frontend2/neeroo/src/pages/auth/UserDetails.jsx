@@ -21,13 +21,18 @@ const UserDetails = () => {
 
     setLoading(true);
     try {
-      const data = await authService.updateUserDetails(user._id, { name: name.trim() });
+      const response = await authService.updateUserDetails(user._id, { name: name.trim() });
+      
+      // Backend returns: { success, message, data: { user } }
+      const updatedUser = response.data?.user || response.user;
+      
       updateUser({ name: name.trim() });
       localStorage.setItem('userName', name.trim());
+      
       toast.success('Profile updated successfully!');
       navigate('/menu');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
