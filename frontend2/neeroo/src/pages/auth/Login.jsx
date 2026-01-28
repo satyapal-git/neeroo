@@ -53,7 +53,7 @@ const Login = () => {
       
       // Backend returns: { success, message, data: { token, user } }
       // So we need to access response.data
-      const { token, user } = response.data;
+      const { token, user } = response.data || response;
       
       console.log('Token:', token); // Debug log
       console.log('User:', user); // Debug log
@@ -100,7 +100,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center gradient-bg animate-gradient-shift p-4">
       <div className="card max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-red from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             🍽️ Taj Food Bakers
           </h1>
           <p className="text-gray-600">Authentic Indian Cuisine</p>
