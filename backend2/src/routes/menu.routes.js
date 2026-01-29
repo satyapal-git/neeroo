@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body, param } = require('express-validator');
+console.log("🔥 MENU.ROUTES.JS EXECUTED1");
 const menuController = require('../controllers/menu.controller');
+console.log("🔥 MENU.ROUTES.JS EXECUTED2");
 const { protectAdmin } = require('../middlewares/admin.middleware');
 const { validate } = require('../middlewares/validation.middleware');
 const { upload, handleUploadError } = require('../middlewares/upload.middleware');

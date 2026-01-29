@@ -1,85 +1,102 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { menuService } from '../services/menuService';
 import toast from 'react-hot-toast';
 
 export const useMenu = (category = null) => {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchItems();
-  }, [category]);
-
-  const fetchItems = async () => {
+  // ✅ Memoized fetch function that can be called manually
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
+      let response;
       
-      let data;
       if (category) {
-        data = await menuService.getItemsByCategory(category);
+        response = await menuService.getItemsByCategory(category);
       } else {
-        data = await menuService.getAllItems();
+        response = await menuService.getAllItems();
       }
       
-      setItems(data.items || []);
+      setItems(response.data || []);
     } catch (err) {
-      setError(err.message);
-      toast.error(err.message);
+      const errorMessage = err.response?.data?.message || 'Failed to load menu items';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [category]);
 
+  // Auto-fetch on mount and when category changes
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  // ✅ Add item with auto-refetch
   const addItem = async (itemData) => {
     try {
-      const data = await menuService.addItem(itemData);
-      setItems(prev => [...prev, data.item]);
-      toast.success('Item added successfully!');
-      return data.item;
+      const response = await menuService.addItem(itemData);
+      
+      // Automatically refetch to update the list
+      await fetchItems();
+      
+      return response;
     } catch (err) {
-      toast.error(err.message);
+      const errorMessage = err.response?.data?.message || 'Failed to add item';
+      toast.error(errorMessage);
       throw err;
     }
   };
 
+  // ✅ Update item with auto-refetch
   const updateItem = async (itemId, itemData) => {
     try {
-      const data = await menuService.updateItem(itemId, itemData);
-      setItems(prev =>
-        prev.map(item => (item._id === itemId ? data.item : item))
-      );
-      toast.success('Item updated successfully!');
-      return data.item;
+      const response = await menuService.updateItem(itemId, itemData);
+      
+      // Automatically refetch to update the list
+      await fetchItems();
+      
+      toast.success('Item updated successfully');
+      return response;
     } catch (err) {
-      toast.error(err.message);
+      const errorMessage = err.response?.data?.message || 'Failed to update item';
+      toast.error(errorMessage);
       throw err;
     }
   };
 
+  // ✅ Delete item with auto-refetch
   const deleteItem = async (itemId) => {
     try {
       await menuService.deleteItem(itemId);
-      setItems(prev => prev.filter(item => item._id !== itemId));
-      toast.success('Item deleted successfully!');
+      
+      // Automatically refetch to update the list
+      await fetchItems();
+      
+      toast.success('Item deleted successfully');
     } catch (err) {
-      toast.error(err.message);
+      const errorMessage = err.response?.data?.message || 'Failed to delete item';
+      toast.error(errorMessage);
       throw err;
     }
   };
 
+  // ✅ Toggle stock with auto-refetch
   const toggleStock = async (itemId) => {
     try {
-      const data = await menuService.toggleStockStatus(itemId);
-      setItems(prev =>
-        prev.map(item =>
-          item._id === itemId ? { ...item, inStock: data.inStock } : item
-        )
-      );
-      toast.success(`Item marked as ${data.inStock ? 'in stock' : 'out of stock'}`);
+      await menuService.toggleStockStatus(itemId);
+      
+      // Automatically refetch to update the list
+      await fetchItems();
+      
+      toast.success('Stock status updated');
     } catch (err) {
-      toast.error(err.message);
+      const errorMessage = err.response?.data?.message || 'Failed to update stock status';
+      toast.error(errorMessage);
       throw err;
     }
   };
@@ -88,7 +105,7 @@ export const useMenu = (category = null) => {
     items,
     loading,
     error,
-    fetchItems,
+    fetchItems, // ✅ Export this so components can manually refetch
     addItem,
     updateItem,
     deleteItem,

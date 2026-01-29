@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import { useMenu } from '../../hooks/useMenu';
 import { CATEGORIES } from '../../utils/constants';
-import { menuService } from '../../services/menuService';
+import { menuService } from '../../services/menuService;
+import { getImageUrl } from '../../utils/helpers';
 import toast from 'react-hot-toast';
 
-const AddItem = () => {
+const EditItem = () => {
   const navigate = useNavigate();
-  const { addItem } = useMenu();
+  const { id } = useParams();
+  const { updateItem, getItemById } = useMenu();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -18,10 +20,37 @@ const AddItem = () => {
     fullPrice: '',
     description: '',
   });
+  const [currentImage, setCurrentImage] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [fetchingItem, setFetchingItem] = useState(true);
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const response = await menuService.getItemById(id);
+        const item = response.data;
+        
+        setFormData({
+          name: item.name,
+          category: item.category,
+          halfPrice: item.halfPrice || '',
+          fullPrice: item.fullPrice || '',
+          description: item.description || '',
+        });
+        setCurrentImage(item.image);
+      } catch (error) {
+        toast.error('Failed to load item details');
+        navigate('/admin/manage-items');
+      } finally {
+        setFetchingItem(false);
+      }
+    };
+
+    fetchItem();
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,13 +60,11 @@ const AddItem = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast.error('Please select an image file');
         return;
       }
 
-      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Image size should be less than 5MB');
         return;
@@ -45,7 +72,6 @@ const AddItem = () => {
 
       setImageFile(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -54,7 +80,7 @@ const AddItem = () => {
     }
   };
 
-  const removeImage = () => {
+  const removeNewImage = () => {
     setImageFile(null);
     setImagePreview(null);
   };
@@ -74,10 +100,10 @@ const AddItem = () => {
 
     setLoading(true);
     try {
-      let imageUrl = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&h=200&fit=crop';
+      let imageUrl = currentImage;
       let cloudinaryId = null;
 
-      // Upload image if selected
+      // Upload new image if selected
       if (imageFile) {
         setUploadingImage(true);
         const formDataImage = new FormData();
@@ -97,7 +123,6 @@ const AddItem = () => {
         setUploadingImage(false);
       }
 
-      // Create item data
       const itemData = {
         name: formData.name.trim(),
         category: formData.category,
@@ -105,29 +130,35 @@ const AddItem = () => {
         fullPrice: formData.fullPrice ? parseFloat(formData.fullPrice) : null,
         description: formData.description.trim() || undefined,
         image: imageUrl,
-        cloudinaryId: cloudinaryId,
       };
 
-      await addItem(itemData);
-      
-      // Reset form
-      setFormData({
-        name: '',
-        category: 'indian',
-        halfPrice: '',
-        fullPrice: '',
-        description: '',
-      });
-      setImageFile(null);
-      setImagePreview(null);
-      
-      toast.success('Item added successfully! Add another or go to Manage Items.');
+      if (cloudinaryId) {
+        itemData.cloudinaryId = cloudinaryId;
+      }
+
+      await updateItem(id, itemData);
+      toast.success('Item updated successfully!');
+      navigate('/admin/manage-items');
     } catch (error) {
-      // Error already handled by hook
+      // Error already handled
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetchingItem) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <AdminSidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading item details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -137,15 +168,29 @@ const AddItem = () => {
         <div className="max-w-2xl mx-auto">
           <div className="card mb-6">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-              ➕ Add New Menu Item
+              ✏️ Edit Menu Item
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="card">
-            {/* Image Upload */}
+            {/* Current Image */}
+            {currentImage && !imagePreview && (
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Current Image
+                </label>
+                <img
+                  src={getImageUrl(currentImage)}
+                  alt="Current"
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            )}
+
+            {/* New Image Upload */}
             <div className="mb-6">
               <label className="block text-gray-700 font-semibold mb-2">
-                Item Image
+                {imagePreview ? 'New Image' : 'Upload New Image (Optional)'}
               </label>
               
               {!imagePreview ? (
@@ -163,7 +208,7 @@ const AddItem = () => {
                     className="cursor-pointer flex flex-col items-center"
                   >
                     <Upload size={48} className="text-gray-400 mb-2" />
-                    <span className="text-gray-600 font-medium">Click to upload image</span>
+                    <span className="text-gray-600 font-medium">Click to upload new image</span>
                     <span className="text-sm text-gray-500 mt-1">
                       PNG, JPG, WEBP up to 5MB
                     </span>
@@ -178,7 +223,7 @@ const AddItem = () => {
                   />
                   <button
                     type="button"
-                    onClick={removeImage}
+                    onClick={removeNewImage}
                     className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
                     disabled={loading}
                   >
@@ -186,9 +231,6 @@ const AddItem = () => {
                   </button>
                 </div>
               )}
-              <p className="text-sm text-gray-600 mt-2">
-                {imageFile ? `Selected: ${imageFile.name}` : 'No image selected (will use default)'}
-              </p>
             </div>
 
             {/* Item Name */}
@@ -291,7 +333,7 @@ const AddItem = () => {
                 disabled={loading || uploadingImage}
                 className="btn-primary flex-1"
               >
-                {uploadingImage ? 'Uploading Image...' : loading ? 'Adding Item...' : 'Add Item'}
+                {uploadingImage ? 'Uploading Image...' : loading ? 'Updating...' : 'Update Item'}
               </button>
               <button
                 type="button"
@@ -299,7 +341,7 @@ const AddItem = () => {
                 className="btn-secondary flex-1"
                 disabled={loading}
               >
-                Go to Manage Items
+                Cancel
               </button>
             </div>
           </form>
@@ -309,4 +351,4 @@ const AddItem = () => {
   );
 };
 
-export default AddItem;
+export default EditItem;

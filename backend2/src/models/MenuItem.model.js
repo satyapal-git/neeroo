@@ -64,8 +64,6 @@ const menuItemSchema = new mongoose.Schema(
 menuItemSchema.pre('validate', function (next) {
   if (!this.halfPrice && !this.fullPrice) {
     next(new Error('At least one price (half or full) must be provided'));
-  } else {
-    next();
   }
 });
 

@@ -14,6 +14,7 @@ const rateLimiter = require('./middlewares/rateLimiter.middleware');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const menuRoutes = require('./routes/menu.routes');
+console.log("🔥 APP.JS EXECUTED1");
 const orderRoutes = require('./routes/order.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const cartRoutes = require('./routes/cart.routes');
