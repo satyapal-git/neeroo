@@ -3,10 +3,11 @@ const logger = require('../utils/logger.util');
 
 const connectDB = async () => {
   try {
-    const MONGODB_URI = process.env.NODE_ENV === 'production' 
-      ? process.env.MONGODB_URI_PROD 
-      : process.env.MONGODB_URI;
+    // const MONGODB_URI = process.env.NODE_ENV === 'production' 
+    //   ? process.env.MONGODB_URI_PROD 
+    //   : process.env.MONGODB_URI;
 
+       const MONGODB_URI =  process.env.MONGODB_URI_PROD
     const options = {
       // Connection options
       maxPoolSize: 10,
