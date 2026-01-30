@@ -112,8 +112,6 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.pre('validate', function (next) {
   if (this.orderType === ORDER_TYPE.DINE_IN && !this.tableNumber) {
     next(new Error('Table number is required for dine-in orders'));
-  } else {
-    next();
   }
 });
 
