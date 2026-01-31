@@ -26,6 +26,8 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
+    // ✅ Return response.data directly
+    // This means: axios response.data = { success, message, data }
     return response.data;
   },
   (error) => {
@@ -37,6 +39,7 @@ api.interceptors.response.use(
       if (error.response.status === 401) {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('fcmToken');
         window.location.href = '/';
       }
       

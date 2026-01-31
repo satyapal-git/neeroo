@@ -19,6 +19,7 @@ const orderRoutes = require('./routes/order.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const cartRoutes = require('./routes/cart.routes');
 const userRoutes = require('./routes/user.routes');
+const fcmRoutes = require('./routes/fcm.routes');
 
 const app = express();
 
@@ -61,7 +62,7 @@ app.use('/uploads', express.static('uploads'));
 // Rate Limiting
 app.use('/api', rateLimiter);
 
-app.use(mongoSanitize({replaceWith: '_',sanitizeQuery: false,}));
+app.use(mongoSanitize({ replaceWith: '_', sanitizeQuery: false }));
 app.use(xss());
 
 // Health Check Route
@@ -72,11 +73,17 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV,
+    features: {
+      websocket: true,
+      pushNotifications: process.env.FIREBASE_ENABLED === 'true',
+    },
   });
 });
 
 // API Routes
 const API_VERSION = process.env.API_VERSION || 'v1';
+
+// Versioned Routes
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/menu`, menuRoutes);
@@ -84,6 +91,7 @@ app.use(`/api/${API_VERSION}/orders`, orderRoutes);
 app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
 app.use(`/api/${API_VERSION}/cart`, cartRoutes);
 app.use(`/api/${API_VERSION}/user`, userRoutes);
+app.use(`/api/${API_VERSION}/fcm`, fcmRoutes);
 
 // Backward compatibility (without version)
 app.use('/api/auth', authRoutes);
@@ -93,6 +101,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/fcm', fcmRoutes);
 
 // 404 Handler
 // app.use('*', (req, res) => {

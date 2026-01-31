@@ -10,7 +10,7 @@ const logger = require('../utils/logger.util');
  * @route   POST /api/auth/send-otp
  * @access  Public
  */
-const sendUserOTP = async (req, res, next) => {
+const sendUserOTP = async (req, res) => {  // ✅ No 'next'
   try {
     const { mobile } = req.body || {};
 
@@ -37,7 +37,7 @@ const sendUserOTP = async (req, res, next) => {
  * @route   POST /api/auth/verify-otp
  * @access  Public
  */
-const verifyUserOTP = async (req, res, next) => {
+const verifyUserOTP = async (req, res) => {  // ✅ No 'next'
   try {
     const { mobile, otp } = req.body || {};
 
@@ -96,7 +96,7 @@ const verifyUserOTP = async (req, res, next) => {
  * @route   GET /api/auth/profile
  * @access  Private
  */
-const getUserProfile = async (req, res, next) => {
+const getUserProfile = async (req, res) => {  // ✅ No 'next'
   try {
     const user = await User.findById(req.userId);
 
@@ -126,7 +126,7 @@ const getUserProfile = async (req, res, next) => {
  * @route   PUT /api/auth/profile
  * @access  Private
  */
-const updateUserProfile = async (req, res, next) => {
+const updateUserProfile = async (req, res) => {  // ✅ No 'next'
   try {
     const { name } = req.body;
 

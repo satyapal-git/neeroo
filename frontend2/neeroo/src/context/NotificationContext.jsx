@@ -1,5 +1,7 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import { notificationService } from '../services/notificationService';
+import socketService from '../services/socketService';
+import fcmService from '../services/fcmService';
 import toast from 'react-hot-toast';
 
 export const NotificationContext = createContext();
@@ -9,44 +11,111 @@ export const NotificationProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      fetchNotifications();
-      fetchUnreadCount();
-      
-      // Setup real-time updates
-      const cleanup = notificationService.setupRealtimeUpdates((count) => {
-        setUnreadCount(count);
-        if (count > unreadCount) {
-          fetchNotifications();
-        }
-      });
-
-      return cleanup;
-    }
-  }, []);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const data = await notificationService.getNotifications();
-      setNotifications(data.notifications || []);
+      setNotifications(data.data.notifications || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     try {
       const data = await notificationService.getUnreadCount();
-      setUnreadCount(data.count || 0);
+      setUnreadCount(data.data.count || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
-  };
+  }, []);
+
+  const handleNewNotification = useCallback((data) => {
+    const { notification, type } = data;
+    
+    // Add to notifications list
+    setNotifications(prev => [notification, ...prev]);
+    
+    // Increment unread count
+    setUnreadCount(prev => prev + 1);
+    
+    // Show toast notification
+    const notificationIcons = {
+      new_order: '🛎️',
+      order_update: '📦',
+      admin_message: '💬',
+    };
+    
+    const icon = notificationIcons[type] || '🔔';
+    
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? 'animate-enter' : 'animate-leave'
+        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5 text-2xl">
+              {icon}
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                {notification.title}
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                {notification.message}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex border-l border-gray-200">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: 'top-right',
+    });
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    
+    if (token) {
+      // Initial fetch
+      fetchNotifications();
+      fetchUnreadCount();
+      
+      // Register FCM token
+      fcmService.registerToken().catch(console.error);
+      
+      // Setup FCM foreground listener
+      fcmService.setupForegroundListener((payload) => {
+        console.log('FCM foreground notification:', payload);
+        fetchNotifications();
+        fetchUnreadCount();
+      });
+      
+      // Connect to WebSocket
+      socketService.connect(token);
+      
+      // Listen for WebSocket notifications
+      socketService.on('new_notification', handleNewNotification);
+      
+      // Cleanup
+      return () => {
+        socketService.off('new_notification', handleNewNotification);
+      };
+    }
+  }, [fetchNotifications, fetchUnreadCount, handleNewNotification]);
 
   const markAsRead = async (notificationId) => {
     try {
