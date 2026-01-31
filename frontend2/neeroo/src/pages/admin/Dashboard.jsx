@@ -10,6 +10,7 @@ import { useOrders } from '../../hooks/useOrders';
 import { useNotifications } from '../../hooks/useNotifications';
 import { formatCurrency } from '../../utils/helpers';
 import { ORDER_STATUS } from '../../utils/constants';
+import NotificationBell from '../../components/common/NotificationBell';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -45,13 +46,14 @@ const Dashboard = () => {
               <p className="text-sm text-gray-600">{user?.mobile}</p>
             </div>
             <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <Bell size={24} />
-              {unreadCount > 0 && (
+              <NotificationBell size={24} />
+              {/* {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {unreadCount}
                 </span>
-              )}
+              )} */}
             </button>
+            
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"

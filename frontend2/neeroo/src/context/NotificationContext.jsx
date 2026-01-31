@@ -40,6 +40,14 @@ export const NotificationProvider = ({ children }) => {
     
     // Increment unread count
     setUnreadCount(prev => prev + 1);
+
+    try {
+      const audio = new Audio('/notification.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio play failed:', e));
+    } catch (error) {
+      console.log('Audio not available');
+    }
     
     // Show toast notification
     const notificationIcons = {
