@@ -27,9 +27,10 @@ const Profile = () => {
             <ArrowLeft size={20} />
             Back to Menu
           </button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+          {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent"> */}
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-800 to-yellow-900 bg-clip-text text-transparent"></h1>
             👤 My Profile
-          </h1>
+          {/* </h1> */}
         </div>
 
         <div className="card mb-6">
