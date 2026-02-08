@@ -41,13 +41,13 @@ const OrderCard = ({ order }) => {
             <div key={idx} className="flex justify-between items-center p-2 bg-white rounded border border-gray-200">
               <span className="font-medium">{item.name}</span>
               <span className="text-gray-600">x{item.quantity}</span>
-              <span className="font-bold text-primary-600">{formatCurrency(item.price * item.quantity)}</span>
+              <span className="font-bold text-amber-700">{formatCurrency(item.price * item.quantity)}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-primary-500 to-purple-600 text-white p-4 rounded-lg">
+      <div className="bg-gradient-to-r from-amber-700 to-yellow-800 text-white p-4 rounded-lg">
         <div className="flex justify-between mb-2">
           <span>Subtotal:</span>
           <span>{formatCurrency(order.subtotal)}</span>

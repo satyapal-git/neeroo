@@ -1,3 +1,74 @@
+// module.exports = {
+//   // Success Messages
+//   SUCCESS: {
+//     OTP_SENT: 'OTP sent successfully',
+//     LOGIN_SUCCESS: 'Login successful',
+//     SIGNUP_SUCCESS: 'Account created successfully',
+//     PROFILE_UPDATED: 'Profile updated successfully',
+//     ORDER_CREATED: 'Order placed successfully',
+//     ORDER_UPDATED: 'Order status updated successfully',
+//     ITEM_CREATED: 'Menu item added successfully',
+//     ITEM_UPDATED: 'Menu item updated successfully',
+//     ITEM_DELETED: 'Menu item deleted successfully',
+//     STOCK_UPDATED: 'Stock status updated successfully',
+//     NOTIFICATION_SENT: 'Notification sent successfully',
+//     NOTIFICATION_READ: 'Notification marked as read',
+//     NOTIFICATION_DELETED: 'Notification deleted successfully',
+//   },
+
+//   // Error Messages
+//   ERROR: {
+//     INVALID_MOBILE: 'Invalid mobile number',
+//     INVALID_OTP: 'Invalid OTP',
+//     OTP_EXPIRED: 'OTP has expired. Please request a new one',
+//     OTP_SEND_FAILED: 'Failed to send OTP. Please try again',
+//     UNAUTHORIZED: 'Unauthorized access',
+//     FORBIDDEN: 'Access forbidden',
+//     NOT_FOUND: 'Resource not found',
+//     USER_NOT_FOUND: 'User not found',
+//     ADMIN_NOT_FOUND: 'Admin not found',
+//     ORDER_NOT_FOUND: 'Order not found',
+//     ITEM_NOT_FOUND: 'Menu item not found',
+//     NOTIFICATION_NOT_FOUND: 'Notification not found',
+//     INVALID_CREDENTIALS: 'Invalid credentials',
+//     DUPLICATE_MOBILE: 'Mobile number already registered',
+//     DUPLICATE_EMAIL: 'Email already registered',
+//     DUPLICATE_RESTAURANT_ID: 'Restaurant ID already exists',
+//     INVALID_ORDER_STATUS: 'Invalid order status',
+//     INVALID_CATEGORY: 'Invalid category',
+//     FILE_TOO_LARGE: 'File size exceeds maximum limit',
+//     INVALID_FILE_TYPE: 'Invalid file type',
+//     UPLOAD_FAILED: 'File upload failed',
+//     SERVER_ERROR: 'Internal server error',
+//     VALIDATION_ERROR: 'Validation error',
+//     TOKEN_EXPIRED: 'Token has expired',
+//     INVALID_TOKEN: 'Invalid token',
+//     MISSING_FIELDS: 'Required fields are missing',
+//   },
+
+//   // Validation Messages
+//   VALIDATION: {
+//     MOBILE_REQUIRED: 'Mobile number is required',
+//     MOBILE_INVALID: 'Mobile number must be 10 digits',
+//     OTP_REQUIRED: 'OTP is required',
+//     OTP_INVALID: 'OTP must be 6 digits',
+//     NAME_REQUIRED: 'Name is required',
+//     EMAIL_REQUIRED: 'Email is required',
+//     EMAIL_INVALID: 'Invalid email format',
+//     RESTAURANT_ID_REQUIRED: 'Restaurant ID is required',
+//     ITEM_NAME_REQUIRED: 'Item name is required',
+//     CATEGORY_REQUIRED: 'Category is required',
+//     PRICE_REQUIRED: 'At least one price (half or full) is required',
+//     PRICE_INVALID: 'Price must be a positive number',
+//     ORDER_TYPE_REQUIRED: 'Order type is required',
+//     TABLE_NUMBER_REQUIRED: 'Table number is required for dine-in orders',
+//     ITEMS_REQUIRED: 'Order must contain at least one item',
+//     STATUS_REQUIRED: 'Status is required',
+//   },
+// };
+
+// new start
+
 module.exports = {
   // Success Messages
   SUCCESS: {
@@ -14,6 +85,9 @@ module.exports = {
     NOTIFICATION_SENT: 'Notification sent successfully',
     NOTIFICATION_READ: 'Notification marked as read',
     NOTIFICATION_DELETED: 'Notification deleted successfully',
+    PAYMENT_ORDER_CREATED: 'Payment order created successfully',
+    PAYMENT_VERIFIED: 'Payment verified successfully',
+    REFUND_INITIATED: 'Refund initiated successfully',
   },
 
   // Error Messages
@@ -44,6 +118,10 @@ module.exports = {
     TOKEN_EXPIRED: 'Token has expired',
     INVALID_TOKEN: 'Invalid token',
     MISSING_FIELDS: 'Required fields are missing',
+    PAYMENT_FAILED: 'Payment failed',
+    PAYMENT_VERIFICATION_FAILED: 'Payment verification failed',
+    ALREADY_PAID: 'Order already paid',
+    REFUND_FAILED: 'Refund initiation failed',
   },
 
   // Validation Messages

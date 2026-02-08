@@ -18,12 +18,12 @@ const Orders = () => {
         <div className="card mb-6">
           <button
             onClick={() => navigate('/menu')}
-            className="flex items-center gap-2 text-primary-600 font-semibold hover:underline mb-4"
+            className="flex items-center gap-2 text-amber-700 font-semibold hover:underline mb-4"
           >
             <ArrowLeft size={20} />
             Back to Menu
           </button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-700 to-yellow-800 bg-clip-text text-transparent">
             📋 My Orders
           </h1>
         </div>
@@ -34,12 +34,12 @@ const Orders = () => {
           <ErrorMessage message={error} onRetry={fetchOrders} />
         ) : orders.length === 0 ? (
           <div className="card text-center py-12">
-            <ShoppingBag size={64} className="mx-auto text-gray-400 mb-4" />
+            <ShoppingBag size={64} className="mx-auto text-amber-700 mb-4" />
             <h2 className="text-2xl font-bold text-gray-700 mb-2">No Orders Yet!</h2>
             <p className="text-gray-600 mb-6">Start exploring our delicious menu</p>
             <button
               onClick={() => navigate('/menu')}
-              className="btn-primary"
+              className="bg-gradient-to-r from-amber-700 to-yellow-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
             >
               Order Now
             </button>

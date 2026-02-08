@@ -26,12 +26,18 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      await authService.sendAdminOTP(mobile);
-      toast.success('OTP sent successfully!');
-      setStep('otp');
-      startTimer();
+      const response = await authService.sendAdminOTP(mobile);
+      
+      if (response.success) {
+        toast.success(response.message || 'OTP sent successfully!');
+        setStep('otp');
+        startTimer();
+      } else {
+        toast.error(response.message || 'Failed to send OTP');
+      }
     } catch (error) {
-      toast.error(error.message);
+      console.error('Send Admin OTP Error:', error);
+      toast.error(error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -47,12 +53,19 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      const data = await authService.verifyAdminOTP(mobile, otp);
-      login(data.token, USER_ROLE.ADMIN, data.admin);
-      toast.success('Login successful!');
-      navigate('/admin/dashboard');
+      const response = await authService.verifyAdminOTP(mobile, otp);
+      
+      if (response.success && response.data) {
+        const { token, admin } = response.data;
+        login(token, USER_ROLE.ADMIN, admin);
+        toast.success('Login successful!');
+        navigate('/admin/dashboard');
+      } else {
+        toast.error(response.message || 'Invalid OTP');
+      }
     } catch (error) {
-      toast.error(error.message);
+      console.error('Verify Admin OTP Error:', error);
+      toast.error(error.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -71,9 +84,9 @@ const AdminLogin = () => {
     }, 1000);
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setOtp('');
-    setStep('mobile');
+    await handleSendOTP({ preventDefault: () => {} });
   };
 
   return (
@@ -100,13 +113,14 @@ const AdminLogin = () => {
                 maxLength="10"
                 className="input-field"
                 disabled={loading}
+                autoFocus
               />
             </div>
             
             <button
               type="submit"
-              disabled={loading || !mobile}
-              className="btn-primary w-full"
+              disabled={loading || !mobile || mobile.length !== 10}
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Sending...' : 'Send OTP'}
             </button>
@@ -123,12 +137,15 @@ const AdminLogin = () => {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit OTP"
                 maxLength="6"
-                className="input-field"
+                className="input-field text-center text-2xl tracking-widest"
                 disabled={loading}
                 autoFocus
               />
+              <p className="text-sm text-gray-500 mt-2 text-center">
+                OTP sent to {mobile}
+              </p>
               {timer > 0 && (
-                <p className="text-sm text-gray-600 mt-2 text-center">
+                <p className="text-sm text-gray-600 mt-1 text-center">
                   Resend OTP in {timer}s
                 </p>
               )}
@@ -136,21 +153,36 @@ const AdminLogin = () => {
             
             <button
               type="submit"
-              disabled={loading || !otp}
-              className="btn-primary w-full mb-3"
+              disabled={loading || !otp || otp.length !== 6}
+              className="btn-primary w-full mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Verifying...' : 'Verify & Login'}
             </button>
             
-            {timer === 0 && (
+            <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={handleResend}
-                className="w-full text-primary-600 font-semibold hover:underline"
+                onClick={() => {
+                  setStep('mobile');
+                  setOtp('');
+                  setTimer(0);
+                }}
+                className="text-gray-600 font-semibold hover:text-gray-800"
               >
-                Resend OTP
+                Change Number
               </button>
-            )}
+              
+              {timer === 0 && (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={loading}
+                  className="text-primary-600 font-semibold hover:underline disabled:opacity-50"
+                >
+                  Resend OTP
+                </button>
+              )}
+            </div>
           </form>
         )}
 

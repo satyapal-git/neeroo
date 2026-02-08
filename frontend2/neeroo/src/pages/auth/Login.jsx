@@ -26,9 +26,11 @@ const Login = () => {
 
     setLoading(true);
     try {
+      console.log('🔵 Sending OTP to:', mobile); // Debug
       const response = await authService.sendUserOTP(mobile);
+      console.log('✅ Send OTP Response:', response); // Debug
       
-      // Response structure: { success, message, data }
+      // Response structure: { success, message, data: { mobile, expiresAt } }
       if (response.success) {
         toast.success(response.message || 'OTP sent successfully!');
         setStep('otp');
@@ -37,7 +39,7 @@ const Login = () => {
         toast.error(response.message || 'Failed to send OTP');
       }
     } catch (error) {
-      console.error('Send OTP Error:', error);
+      console.error('❌ Send OTP Error:', error);
       toast.error(error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
@@ -54,16 +56,16 @@ const Login = () => {
 
     setLoading(true);
     try {
+      console.log('🔵 Verifying OTP...'); // Debug
       const response = await authService.verifyUserOTP(mobile, otp);
-      
-      console.log('Verify OTP Response:', response); // Debug log
+      console.log('✅ Verify OTP Response:', response); // Debug
       
       // Response structure: { success, message, data: { token, user } }
       if (response.success && response.data) {
-        const { token, user } = response.data || response;
+        const { token, user } = response.data;
         
-        console.log('Token:', token); // Debug log
-        console.log('User:', user); // Debug log
+        console.log('Token:', token); // Debug
+        console.log('User:', user); // Debug
         
         // Check if user exists and has name
         if (user && user.name) {
@@ -81,7 +83,7 @@ const Login = () => {
         toast.error(response.message || 'Invalid OTP');
       }
     } catch (error) {
-      console.error('Verify OTP Error:', error); // Debug log
+      console.error('❌ Verify OTP Error:', error);
       toast.error(error.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);

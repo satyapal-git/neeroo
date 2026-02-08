@@ -92,7 +92,8 @@ const Menu = () => {
   const currentCategory = CATEGORIES.find(cat => cat.id === selectedCategory);
 
   return (
-    <div className="flex flex-col h-screen bg-[#FAF7F5]">
+    <div className="flex flex-col bg-[#FAF7F5]" style={{ height: '100vh' }}>
+    {/* <div className="flex flex-col h-screen bg-[#FAF7F5]">*/}
       {/* Keep existing Navbar - it has all profile features */}
       <Navbar />
       

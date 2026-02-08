@@ -1,3 +1,125 @@
+// const express = require('express');
+// const cors = require('cors');
+// const helmet = require('helmet');
+// const mongoSanitize = require('express-mongo-sanitize');
+// const xss = require('xss-clean');
+// const compression = require('compression');
+// const cookieParser = require('cookie-parser');
+// const morgan = require('morgan');
+// const logger = require('./utils/logger.util');
+// const errorMiddleware = require('./middlewares/error.middleware');
+// const rateLimiter = require('./middlewares/rateLimiter.middleware');
+
+// // Import Routes
+// const authRoutes = require('./routes/auth.routes');
+// const adminRoutes = require('./routes/admin.routes');
+// const menuRoutes = require('./routes/menu.routes');
+// console.log("🔥 APP.JS EXECUTED1");
+// const orderRoutes = require('./routes/order.routes');
+// const notificationRoutes = require('./routes/notification.routes');
+// const cartRoutes = require('./routes/cart.routes');
+// const userRoutes = require('./routes/user.routes');
+// const fcmRoutes = require('./routes/fcm.routes');
+
+// const app = express();
+
+// // Trust proxy
+// app.set('trust proxy', 1);
+
+// // Security Middleware
+// app.use(helmet());
+
+// // CORS Configuration
+// const corsOptions = {
+//   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+//   credentials: true,
+//   optionsSuccessStatus: 200,
+// };
+// app.use(cors(corsOptions));
+
+// // Body Parser Middleware
+// app.use(express.json({ limit: '10mb' }));
+// app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// app.use(cookieParser());
+
+// // Compression Middleware
+// app.use(compression());
+
+// // Logging Middleware
+// if (process.env.NODE_ENV === 'development') {
+//   app.use(morgan('dev'));
+// } else {
+//   app.use(morgan('combined', {
+//     stream: {
+//       write: (message) => logger.info(message.trim())
+//     }
+//   }));
+// }
+
+// // Static Files
+// app.use('/uploads', express.static('uploads'));
+
+// // Rate Limiting
+// app.use('/api', rateLimiter);
+
+// app.use(mongoSanitize({ replaceWith: '_', sanitizeQuery: false }));
+// app.use(xss());
+
+// // Health Check Route
+// app.get('/api/health', (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: 'Server is running',
+//     timestamp: new Date().toISOString(),
+//     uptime: process.uptime(),
+//     environment: process.env.NODE_ENV,
+//     features: {
+//       websocket: true,
+//       pushNotifications: process.env.FIREBASE_ENABLED === 'true',
+//     },
+//   });
+// });
+
+// // API Routes
+// const API_VERSION = process.env.API_VERSION || 'v1';
+
+// // Versioned Routes
+// app.use(`/api/${API_VERSION}/auth`, authRoutes);
+// app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+// app.use(`/api/${API_VERSION}/menu`, menuRoutes);
+// app.use(`/api/${API_VERSION}/orders`, orderRoutes);
+// app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
+// app.use(`/api/${API_VERSION}/cart`, cartRoutes);
+// app.use(`/api/${API_VERSION}/user`, userRoutes);
+// app.use(`/api/${API_VERSION}/fcm`, fcmRoutes);
+
+// // Backward compatibility (without version)
+// app.use('/api/auth', authRoutes);
+// app.use('/api/admin', adminRoutes);
+// app.use('/api/menu', menuRoutes);
+// app.use('/api/orders', orderRoutes);
+// app.use('/api/notifications', notificationRoutes);
+// app.use('/api/cart', cartRoutes);
+// app.use('/api/user', userRoutes);
+// app.use('/api/fcm', fcmRoutes);
+
+// // 404 Handler
+// // app.use('*', (req, res) => {
+// //   res.status(404).json({
+// //     success: false,
+// //     message: `Route ${req.originalUrl} not found`,
+// //   });
+// // });
+
+// // Error Handling Middleware (must be last)
+// app.use(errorMiddleware);
+
+// module.exports = app;
+
+
+// new start
+
+// new start
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -21,97 +143,193 @@ const cartRoutes = require('./routes/cart.routes');
 const userRoutes = require('./routes/user.routes');
 const fcmRoutes = require('./routes/fcm.routes');
 
-const app = express();
+console.log("🔥 BEFORE PAYMENT ROUTES IMPORT");
+try {
+  const paymentRoutes = require('./routes/payment.routes');
+  console.log("🔥 AFTER PAYMENT ROUTES IMPORT - SUCCESS");
+  
+  const app = express();
 
-// Trust proxy
-app.set('trust proxy', 1);
+  // Trust proxy
+  app.set('trust proxy', 1);
 
-// Security Middleware
-app.use(helmet());
+  // Security Middleware
+  app.use(helmet());
 
-// CORS Configuration
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+  // CORS Configuration
+  const corsOptions = {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200,
+  };
+  app.use(cors(corsOptions));
 
-// Body Parser Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
+  // Body Parser Middleware
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(cookieParser());
 
-// Compression Middleware
-app.use(compression());
+  // Compression Middleware
+  app.use(compression());
 
-// Logging Middleware
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined', {
-    stream: {
-      write: (message) => logger.info(message.trim())
-    }
-  }));
-}
+  // Logging Middleware
+  if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+  } else {
+    app.use(morgan('combined', {
+      stream: {
+        write: (message) => logger.info(message.trim())
+      }
+    }));
+  }
 
-// Static Files
-app.use('/uploads', express.static('uploads'));
+  // Static Files
+  app.use('/uploads', express.static('uploads'));
 
-// Rate Limiting
-app.use('/api', rateLimiter);
+  // Rate Limiting
+  app.use('/api', rateLimiter);
 
-app.use(mongoSanitize({ replaceWith: '_', sanitizeQuery: false }));
-app.use(xss());
+  app.use(mongoSanitize({replaceWith: '_',sanitizeQuery: false,}));
+  app.use(xss());
 
-// Health Check Route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV,
-    features: {
-      websocket: true,
-      pushNotifications: process.env.FIREBASE_ENABLED === 'true',
-    },
+  // Health Check Route
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      features: {
+        websocket: true,
+        pushNotifications: process.env.FIREBASE_ENABLED === 'true',
+      },
+    });
   });
-});
 
-// API Routes
-const API_VERSION = process.env.API_VERSION || 'v1';
+  console.log("🔥 BEFORE REGISTERING ROUTES");
 
-// Versioned Routes
-app.use(`/api/${API_VERSION}/auth`, authRoutes);
-app.use(`/api/${API_VERSION}/admin`, adminRoutes);
-app.use(`/api/${API_VERSION}/menu`, menuRoutes);
-app.use(`/api/${API_VERSION}/orders`, orderRoutes);
-app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
-app.use(`/api/${API_VERSION}/cart`, cartRoutes);
-app.use(`/api/${API_VERSION}/user`, userRoutes);
-app.use(`/api/${API_VERSION}/fcm`, fcmRoutes);
+  // API Routes
+  const API_VERSION = process.env.API_VERSION || 'v1';
+  app.use(`/api/${API_VERSION}/auth`, authRoutes);
+  app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+  app.use(`/api/${API_VERSION}/menu`, menuRoutes);
+  app.use(`/api/${API_VERSION}/orders`, orderRoutes);
+  app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
+  app.use(`/api/${API_VERSION}/cart`, cartRoutes);
+  app.use(`/api/${API_VERSION}/user`, userRoutes);
+  app.use(`/api/${API_VERSION}/payment`, paymentRoutes);
+  app.use(`/api/${API_VERSION}/fcm`, fcmRoutes);
 
-// Backward compatibility (without version)
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/fcm', fcmRoutes);
+  // Backward compatibility (without version)
+  app.use('/api/auth', authRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/menu', menuRoutes);
+  app.use('/api/orders', orderRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  app.use('/api/cart', cartRoutes);
+  app.use('/api/user', userRoutes);
+  app.use('/api/payment', paymentRoutes);
+  app.use('/api/fcm', fcmRoutes);
 
-// 404 Handler
-// app.use('*', (req, res) => {
-//   res.status(404).json({
-//     success: false,
-//     message: `Route ${req.originalUrl} not found`,
-//   });
-// });
+  console.log("🔥 AFTER REGISTERING ROUTES - APP.JS COMPLETE");
 
-// Error Handling Middleware (must be last)
-app.use(errorMiddleware);
+  // Error Handling Middleware (must be last)
+  app.use(errorMiddleware);
 
-module.exports = app;
+  module.exports = app;
+
+} catch (error) {
+  console.error("❌ ERROR IN PAYMENT ROUTES:", error.message);
+  console.error("❌ FULL ERROR:", error);
+  
+  // Fallback without payment routes
+  console.log("⚠️ LOADING APP WITHOUT PAYMENT ROUTES");
+  
+  const app = express();
+
+  // Trust proxy
+  app.set('trust proxy', 1);
+
+  // Security Middleware
+  app.use(helmet());
+
+  // CORS Configuration
+  const corsOptions = {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200,
+  };
+  app.use(cors(corsOptions));
+
+  // Body Parser Middleware
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(cookieParser());
+
+  // Compression Middleware
+  app.use(compression());
+
+  // Logging Middleware
+  if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+  } else {
+    app.use(morgan('combined', {
+      stream: {
+        write: (message) => logger.info(message.trim())
+      }
+    }));
+  }
+
+  // Static Files
+  app.use('/uploads', express.static('uploads'));
+
+  // Rate Limiting
+  app.use('/api', rateLimiter);
+
+  app.use(mongoSanitize({replaceWith: '_',sanitizeQuery: false,}));
+  app.use(xss());
+
+  // Health Check Route
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      features: {
+        websocket: true,
+        pushNotifications: process.env.FIREBASE_ENABLED === 'true',
+      },
+    });
+  });
+
+  // API Routes (WITHOUT PAYMENT)
+  const API_VERSION = process.env.API_VERSION || 'v1';
+  app.use(`/api/${API_VERSION}/auth`, authRoutes);
+  app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+  app.use(`/api/${API_VERSION}/menu`, menuRoutes);
+  app.use(`/api/${API_VERSION}/orders`, orderRoutes);
+  app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
+  app.use(`/api/${API_VERSION}/cart`, cartRoutes);
+  app.use(`/api/${API_VERSION}/user`, userRoutes);
+  app.use(`/api/${API_VERSION}/fcm`, fcmRoutes);
+
+  // Backward compatibility (without version)
+  app.use('/api/auth', authRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/menu', menuRoutes);
+  app.use('/api/orders', orderRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  app.use('/api/cart', cartRoutes);
+  app.use('/api/user', userRoutes);
+  app.use('/api/fcm', fcmRoutes);
+
+  console.log("✅ APP LOADED WITHOUT PAYMENT ROUTES");
+
+  // Error Handling Middleware (must be last)
+  app.use(errorMiddleware);
+
+  module.exports = app;
+}
