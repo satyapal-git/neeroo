@@ -45,6 +45,38 @@ const createRazorpayOrder = async (amount, orderId, customerInfo) => {
 };
 
 /**
+ * Create Razorpay Order Only (without database order - for upfront payment)
+ */
+const createRazorpayOrderOnly = async (amount) => {
+  try {
+    console.log("🔥 Creating Razorpay order without DB order");
+    console.log("🔥 Amount:", amount, "-> Paise:", Math.round(amount * 100));
+
+    const options = {
+      amount: Math.round(amount * 100),
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      payment_capture: 1, // Auto capture payment
+    };
+
+    console.log("🔥 Razorpay options:", JSON.stringify(options));
+
+    const razorpayOrder = await razorpayInstance.orders.create(options);
+    
+    console.log("🔥 Razorpay order created:", razorpayOrder.id);
+    logger.info(`Razorpay order created (standalone): ${razorpayOrder.id}`);
+    
+    return razorpayOrder;
+  } catch (error) {
+    console.error("❌ RAZORPAY FULL ERROR:", JSON.stringify(error));
+    console.error("❌ RAZORPAY ERROR MESSAGE:", error.message);
+    console.error("❌ RAZORPAY ERROR RESPONSE:", error.response?.data || error.response);
+    logger.error(`Razorpay order creation error: ${error.message}`);
+    throw new Error(error.message || 'Failed to create Razorpay order');
+  }
+};
+
+/**
  * Verify Razorpay payment signature
  */
 const verifyPaymentSignature = (razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
@@ -55,7 +87,14 @@ const verifyPaymentSignature = (razorpayOrderId, razorpayPaymentId, razorpaySign
       .update(text)
       .digest('hex');
 
-    return expectedSignature === razorpaySignature;
+    const isValid = expectedSignature === razorpaySignature;
+    
+    console.log("🔥 Payment Signature Verification:");
+    console.log("🔥 Expected:", expectedSignature);
+    console.log("🔥 Received:", razorpaySignature);
+    console.log("🔥 Valid:", isValid);
+
+    return isValid;
   } catch (error) {
     logger.error(`Payment verification error: ${error.message}`);
     return false;
@@ -125,6 +164,7 @@ const initiateRefund = async (paymentId, amount, reason) => {
 
 module.exports = {
   createRazorpayOrder,
+  createRazorpayOrderOnly,     // NEW - for upfront payment
   verifyPaymentSignature,
   updatePaymentStatus,
   fetchPaymentDetails,

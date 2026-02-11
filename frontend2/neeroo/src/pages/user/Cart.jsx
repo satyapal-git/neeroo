@@ -374,8 +374,7 @@ const Cart = () => {
   const [tableNumber, setTableNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [createdOrderId, setCreatedOrderId] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' or 'cash'
+  const [paymentMethod, setPaymentMethod] = useState('online');
 
   const subtotal = getCartSubtotal();
   const gst = getCartGST();
@@ -387,6 +386,43 @@ const Cart = () => {
       return;
     }
 
+    if (paymentMethod === 'online') {
+      // For online payment, show payment UI first
+      setShowPayment(true);
+    } else {
+      // For cash payment, create order directly
+      setLoading(true);
+      try {
+        const orderData = {
+          items: cart.map(item => ({
+            itemId: item.itemId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            portion: item.portion,
+          })),
+          orderType,
+          tableNumber: orderType === ORDER_TYPE.DINE_IN ? tableNumber : null,
+          subtotal,
+          gst,
+          total,
+          paymentMethod: 'cash',
+          paymentStatus: 'pending',
+        };
+
+        const order = await createOrder(orderData);
+        clearCart();
+        toast.success(`Order placed successfully! Order ID: ${order.orderId}`);
+        navigate('/orders');
+      } catch (error) {
+        // Error already shown by hook
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentDetails) => {
     setLoading(true);
     try {
       const orderData = {
@@ -402,38 +438,29 @@ const Cart = () => {
         subtotal,
         gst,
         total,
+        paymentMethod: 'online',
+        paymentStatus: 'completed',
+        razorpayOrderId: paymentDetails.razorpayOrderId,
+        razorpayPaymentId: paymentDetails.razorpayPaymentId,
+        razorpaySignature: paymentDetails.razorpaySignature,
       };
 
       const order = await createOrder(orderData);
-      setCreatedOrderId(order.orderId);
-
-      if (paymentMethod === 'online') {
-        // Show payment section
-        setShowPayment(true);
-        toast.success('Order created! Please complete payment.');
-      } else {
-        // Cash payment - clear cart and redirect
-        clearCart();
-        toast.success(`Order placed successfully! Order ID: ${order.orderId}`);
-        navigate('/orders');
-      }
+      clearCart();
+      setShowPayment(false);
+      toast.success(`Order placed successfully! Order ID: ${order.orderId}`);
+      navigate('/orders');
     } catch (error) {
-      // Error already shown by hook
+      toast.error('Failed to create order after payment. Please contact support with your payment ID: ' + paymentDetails.razorpayPaymentId);
+      console.error('Order creation error:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePaymentSuccess = () => {
-    clearCart();
-    setShowPayment(false);
-    navigate('/orders');
-  };
-
   const handlePaymentFailure = () => {
     setShowPayment(false);
-    toast.error('Payment failed. You can retry from Orders page.');
-    navigate('/orders');
+    toast.error('Payment failed. Please try again.');
   };
 
   if (cart.length === 0) {
@@ -488,7 +515,8 @@ const Cart = () => {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
             <button
               onClick={() => setOrderType(ORDER_TYPE.DINE_IN)}
-              className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all"
+              disabled={showPayment}
+              className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all disabled:opacity-50"
               style={{
                 borderColor: orderType === ORDER_TYPE.DINE_IN ? '#3D2415' : '#D1D5DB',
                 backgroundColor: orderType === ORDER_TYPE.DINE_IN ? '#3D2415' : 'transparent',
@@ -499,7 +527,8 @@ const Cart = () => {
             </button>
             <button
               onClick={() => setOrderType(ORDER_TYPE.TAKEAWAY)}
-              className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all"
+              disabled={showPayment}
+              className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all disabled:opacity-50"
               style={{
                 borderColor: orderType === ORDER_TYPE.TAKEAWAY ? '#3D2415' : '#D1D5DB',
                 backgroundColor: orderType === ORDER_TYPE.TAKEAWAY ? '#3D2415' : 'transparent',
@@ -519,8 +548,9 @@ const Cart = () => {
                 type="text"
                 value={tableNumber}
                 onChange={(e) => setTableNumber(e.target.value)}
+                disabled={showPayment}
                 placeholder="Enter table number (e.g., T1, T2)"
-                className="input-field w-full"
+                className="input-field w-full disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           )}
@@ -582,24 +612,30 @@ const Cart = () => {
             onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#4D3425')}
             onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#3D2415')}
           >
-            {loading ? 'Creating Order...' : 'Place Order'}
+            {loading ? 'Processing...' : paymentMethod === 'online' ? 'Proceed to Payment' : 'Place Order'}
           </button>
         ) : (
           <div className="space-y-4">
-            <div className="card bg-yellow-50 border-2 border-yellow-400">
+            <div className="card bg-blue-50 border-2 border-blue-400">
               <p className="text-center font-semibold text-gray-800 text-sm sm:text-base">
-                ⚡ Order created! Complete payment to confirm.
+                💳 Complete your payment to place the order
               </p>
               <p className="text-center text-xs sm:text-sm text-gray-600 mt-2">
-                Order ID: <span className="font-bold">{createdOrderId}</span>
+                Amount: <span className="font-bold">{formatCurrency(total)}</span>
               </p>
             </div>
             <RazorpayPayment
-              orderId={createdOrderId}
               amount={total}
               onSuccess={handlePaymentSuccess}
               onFailure={handlePaymentFailure}
             />
+            <button
+              onClick={() => setShowPayment(false)}
+              disabled={loading}
+              className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 underline disabled:opacity-50"
+            >
+              Cancel Payment
+            </button>
           </div>
         )}
       </div>

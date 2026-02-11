@@ -56,11 +56,87 @@ const createPaymentOrder = async (req, res, next) => {
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       orderId: order.orderId,
-      key: process.env.RAZORPAY_KEY_ID, // Send to frontend
+      key: process.env.RAZORPAY_KEY_ID,
     });
 
   } catch (error) {
     logger.error(`Create Payment Order Error: ${error.message}`);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * @desc    Create Razorpay Order (without database order - for upfront payment)
+ * @route   POST /api/payment/create-razorpay-order
+ * @access  Private (User)
+ */
+const createRazorpayOrderOnly = async (req, res, next) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount || amount <= 0) {
+      return errorResponse(res, 'Valid amount is required', 400);
+    }
+
+    // Create Razorpay order without database order
+    const razorpayOrder = await paymentService.createRazorpayOrderOnly(amount);
+
+    logger.info(`Razorpay order created for amount: ${amount}`);
+
+    return successResponse(res, 'Razorpay order created successfully', {
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+    });
+
+  } catch (error) {
+    logger.error(`Create Razorpay Order Error: ${error.message}`);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * @desc    Verify Payment Signature (standalone verification)
+ * @route   POST /api/payment/verify-signature
+ * @access  Private (User)
+ */
+const verifyPaymentSignatureOnly = async (req, res, next) => {
+  try {
+    const {
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    } = req.body;
+
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return errorResponse(res, 'Missing payment verification data', 400);
+    }
+
+    // Verify signature
+    const isValidSignature = paymentService.verifyPaymentSignature(
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature
+    );
+
+    if (!isValidSignature) {
+      logger.warn(`Payment signature verification failed - Order ID: ${razorpayOrderId}`);
+      return successResponse(res, 'Payment signature verification result', {
+        verified: false,
+        message: 'Invalid payment signature',
+      });
+    }
+
+    logger.info(`Payment signature verified successfully - Payment ID: ${razorpayPaymentId}`);
+
+    return successResponse(res, 'Payment signature verified successfully', {
+      verified: true,
+      message: 'Payment signature is valid',
+    });
+
+  } catch (error) {
+    logger.error(`Verify Payment Signature Error: ${error.message}`);
     return errorResponse(res, error.message, 500);
   }
 };
@@ -239,7 +315,7 @@ const initiateRefund = async (req, res, next) => {
     return successResponse(res, 'Refund initiated successfully', {
       orderId,
       refundId: refund.id,
-      amount: refund.amount / 100, // Convert paise to rupees
+      amount: refund.amount / 100,
     });
 
   } catch (error) {
@@ -250,6 +326,8 @@ const initiateRefund = async (req, res, next) => {
 
 module.exports = {
   createPaymentOrder,
+  createRazorpayOrderOnly,        // NEW
+  verifyPaymentSignatureOnly,      // NEW
   verifyPayment,
   handlePaymentFailure,
   getPaymentStatus,

@@ -1,10 +1,18 @@
 import api from './api';
 
 /**
- * Create Payment Order
+ * Create Payment Order (with existing orderId)
  */
 export const createPaymentOrder = async (orderId) => {
   const response = await api.post('/payment/create-order', { orderId });
+  return response.data;
+};
+
+/**
+ * Create Razorpay Order (without database orderId - just for payment)
+ */
+export const createRazorpayOrder = async (amount) => {
+  const response = await api.post('/payment/create-razorpay-order', { amount });
   return response.data;
 };
 
@@ -14,6 +22,14 @@ export const createPaymentOrder = async (orderId) => {
 export const verifyPayment = async (paymentData) => {
   const response = await api.post('/payment/verify', paymentData);
   return response.data;
+};
+
+/**
+ * Verify Payment Signature (standalone verification without orderId)
+ */
+export const verifyPaymentSignature = async (verificationData) => {
+  const response = await api.post('/payment/verify-signature', verificationData);
+  return response.data.verified;
 };
 
 /**
@@ -38,7 +54,9 @@ export const getPaymentStatus = async (orderId) => {
 
 const paymentService = {
   createPaymentOrder,
+  createRazorpayOrder,
   verifyPayment,
+  verifyPaymentSignature,
   handlePaymentFailure,
   getPaymentStatus,
 };

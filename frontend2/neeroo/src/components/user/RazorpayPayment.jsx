@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import paymentService from '../../services/paymentService';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
-const RazorpayPayment = ({ orderId, amount, onSuccess, onFailure }) => {
+const RazorpayPayment = ({ amount, onSuccess, onFailure }) => {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -34,12 +32,12 @@ const RazorpayPayment = ({ orderId, amount, onSuccess, onFailure }) => {
         return;
       }
 
-      console.log("🔥 Calling createPaymentOrder with orderId:", orderId);
+      console.log("🔥 Creating Razorpay order for amount:", amount);
 
-      // Create payment order from backend
-      const paymentData = await paymentService.createPaymentOrder(orderId);
+      // Create Razorpay order (without database order)
+      const paymentData = await paymentService.createRazorpayOrder(amount);
 
-      console.log("🔥 Payment data from backend:", paymentData);
+      console.log("🔥 Razorpay order created:", paymentData);
 
       // Razorpay options
       const options = {
@@ -47,45 +45,49 @@ const RazorpayPayment = ({ orderId, amount, onSuccess, onFailure }) => {
         amount: paymentData.amount,
         currency: paymentData.currency,
         name: 'Neeroo Restaurant',
-        description: `Order Payment - ${orderId}`,
+        description: 'Order Payment',
         order_id: paymentData.razorpayOrderId,
         handler: async (response) => {
           try {
-            console.log("🔥 Razorpay handler response:", response);
+            console.log("🔥 Payment successful, Razorpay response:", response);
 
-            // Verify payment on backend
+            // Verify payment signature
             const verificationData = {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
-              orderId: orderId,
             };
 
-            await paymentService.verifyPayment(verificationData);
+            const isVerified = await paymentService.verifyPaymentSignature(verificationData);
             
-            toast.success('Payment successful! 🎉');
-            
-            if (onSuccess) {
-              onSuccess(response);
+            if (isVerified) {
+              toast.success('Payment successful! 🎉');
+              
+              if (onSuccess) {
+                onSuccess({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                });
+              }
             } else {
-              navigate('/orders');
+              throw new Error('Payment verification failed');
             }
           } catch (error) {
-            console.error("🔥 Verify payment error:", error);
+            console.error("🔥 Payment verification error:", error);
             toast.error('Payment verification failed');
             if (onFailure) {
               onFailure(error);
             }
+          } finally {
+            setLoading(false);
           }
         },
         theme: {
           color: '#3D2415',
         },
         modal: {
-          ondismiss: async () => {
-            await paymentService.handlePaymentFailure(orderId, {
-              reason: 'Payment cancelled by user',
-            });
+          ondismiss: () => {
             toast.error('Payment cancelled');
             setLoading(false);
             if (onFailure) {
@@ -97,9 +99,8 @@ const RazorpayPayment = ({ orderId, amount, onSuccess, onFailure }) => {
 
       const razorpay = new window.Razorpay(options);
       
-      razorpay.on('payment.failed', async (response) => {
+      razorpay.on('payment.failed', (response) => {
         console.error("🔥 Razorpay payment.failed:", response);
-        await paymentService.handlePaymentFailure(orderId, response.error);
         toast.error('Payment failed. Please try again.');
         setLoading(false);
         if (onFailure) {
