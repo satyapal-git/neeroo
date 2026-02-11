@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Menu } from 'lucide-react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import { useMenu } from '../../hooks/useMenu';
 import { CATEGORIES } from '../../utils/constants';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 const AddItem = () => {
   const navigate = useNavigate();
   const { addItem } = useMenu();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -131,25 +132,51 @@ const AddItem = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <AdminSidebar />
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-50 
+        transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+        lg:translate-x-0 transition-transform duration-300 ease-in-out
+      `}>
+        <AdminSidebar onClose={() => setSidebarOpen(false)} />
+      </div>
       
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 sm:p-6 overflow-x-hidden w-full">
+        {/* Mobile Header with Hamburger */}
+        <div className="lg:hidden mb-4 flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 hover:bg-gray-200 rounded-lg"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-xl font-bold">Add New Item</h1>
+        </div>
+
         <div className="max-w-2xl mx-auto">
-          <div className="card mb-6">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="card mb-4 sm:mb-6 hidden lg:block">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
               ➕ Add New Menu Item
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="card">
             {/* Image Upload */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-semibold mb-2">
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Item Image
               </label>
               
               {!imagePreview ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-primary-500 transition-colors">
                   <input
                     type="file"
                     accept="image/*"
@@ -162,9 +189,9 @@ const AddItem = () => {
                     htmlFor="image-upload"
                     className="cursor-pointer flex flex-col items-center"
                   >
-                    <Upload size={48} className="text-gray-400 mb-2" />
-                    <span className="text-gray-600 font-medium">Click to upload image</span>
-                    <span className="text-sm text-gray-500 mt-1">
+                    <Upload size={40} className="sm:w-12 sm:h-12 text-gray-400 mb-2" />
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Click to upload image</span>
+                    <span className="text-xs sm:text-sm text-gray-500 mt-1">
                       PNG, JPG, WEBP up to 5MB
                     </span>
                   </label>
@@ -174,7 +201,7 @@ const AddItem = () => {
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-64 object-cover rounded-lg"
+                    className="w-full h-48 sm:h-64 object-cover rounded-lg"
                   />
                   <button
                     type="button"
@@ -186,14 +213,14 @@ const AddItem = () => {
                   </button>
                 </div>
               )}
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-xs sm:text-sm text-gray-600 mt-2">
                 {imageFile ? `Selected: ${imageFile.name}` : 'No image selected (will use default)'}
               </p>
             </div>
 
             {/* Item Name */}
             <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Item Name *
               </label>
               <input
@@ -209,7 +236,7 @@ const AddItem = () => {
 
             {/* Category */}
             <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Category *
               </label>
               <select
@@ -228,9 +255,9 @@ const AddItem = () => {
             </div>
 
             {/* Prices */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                   Half Price (₹)
                 </label>
                 <input
@@ -247,7 +274,7 @@ const AddItem = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
+                <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                   Full Price (₹)
                 </label>
                 <input
@@ -265,8 +292,8 @@ const AddItem = () => {
             </div>
 
             {/* Description */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-semibold mb-2">
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Description (Optional)
               </label>
               <textarea
@@ -279,24 +306,24 @@ const AddItem = () => {
                 className="input-field resize-none"
                 disabled={loading}
               />
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 {formData.description.length}/500 characters
               </p>
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 type="submit"
                 disabled={loading || uploadingImage}
-                className="btn-primary flex-1"
+                className="btn-primary flex-1 text-sm sm:text-base"
               >
                 {uploadingImage ? 'Uploading Image...' : loading ? 'Adding Item...' : 'Add Item'}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/admin/manage-items')}
-                className="btn-secondary flex-1"
+                className="btn-secondary flex-1 text-sm sm:text-base"
                 disabled={loading}
               >
                 Go to Manage Items
