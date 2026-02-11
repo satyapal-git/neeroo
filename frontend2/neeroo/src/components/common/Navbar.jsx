@@ -21,19 +21,20 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/menu" className="flex items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-teal-500 bg-clip-text text-transparent">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-red-500 to-teal-500 bg-clip-text text-transparent">
               {APP_NAME}
             </h1>
           </Link>
 
           {/* Navigation Items */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* My Orders Link */}
             <Link
               to="/orders"
-              className="text-gray-700 hover:text-primary-600 font-semibold transition-colors"
+              className="text-sm sm:text-base text-gray-700 hover:text-primary-600 font-semibold transition-colors"
             >
-              My Orders
+              <span className="hidden sm:inline">My Orders</span>
+              <span className="sm:hidden">Orders</span>
             </Link>
 
             {/* Cart Button */}
@@ -42,7 +43,7 @@ const Navbar = () => {
               className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors"
               aria-label="Shopping Cart"
             >
-              <ShoppingCart size={24} />
+              <ShoppingCart size={20} className="sm:w-6 sm:h-6" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {cartCount}
@@ -58,8 +59,8 @@ const Navbar = () => {
               to="/profile"
               className="flex items-center gap-2 text-gray-700 hover:text-primary-600 transition-colors"
             >
-              <User size={24} />
-              <span className="font-semibold hidden sm:inline">
+              <User size={20} className="sm:w-6 sm:h-6" />
+              <span className="font-semibold hidden sm:inline text-sm sm:text-base">
                 {userName || userMobile || 'User'}
               </span>
             </Link>
