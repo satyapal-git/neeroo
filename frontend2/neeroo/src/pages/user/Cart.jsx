@@ -458,23 +458,23 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen p-4" style={{ backgroundColor: '#FAF7F5' }}>
+    <div className="min-h-screen p-3 sm:p-4" style={{ backgroundColor: '#FAF7F5' }}>
       <div className="max-w-4xl mx-auto">
-        <div className="card mb-6">
+        <div className="card mb-4 sm:mb-6">
           <button
             onClick={() => navigate('/menu')}
-            className="flex items-center gap-2 font-semibold hover:underline mb-4"
+            className="flex items-center gap-2 font-semibold hover:underline mb-3 sm:mb-4"
             style={{ color: '#3D2415' }}
           >
             <ArrowLeft size={20} />
             Back to Menu
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             🛒 Your Cart
           </h1>
         </div>
 
-        <div className="card mb-6">
+        <div className="card mb-4 sm:mb-6">
           <div className="space-y-3">
             {cart.map((item) => (
               <CartItem key={item.itemKey} item={item} />
@@ -482,10 +482,10 @@ const Cart = () => {
           </div>
         </div>
 
-        <div className="card mb-6">
-          <h3 className="text-xl font-bold mb-4">Order Details</h3>
+        <div className="card mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-bold mb-4">Order Details</h3>
           
-          <div className="flex gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
             <button
               onClick={() => setOrderType(ORDER_TYPE.DINE_IN)}
               className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all"
@@ -512,7 +512,7 @@ const Cart = () => {
 
           {orderType === ORDER_TYPE.DINE_IN && (
             <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Table Number
               </label>
               <input
@@ -520,20 +520,20 @@ const Cart = () => {
                 value={tableNumber}
                 onChange={(e) => setTableNumber(e.target.value)}
                 placeholder="Enter table number (e.g., T1, T2)"
-                className="input-field"
+                className="input-field w-full"
               />
             </div>
           )}
 
           {!showPayment && (
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">
+              <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
                 Payment Method
               </label>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={() => setPaymentMethod('online')}
-                  className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all"
+                  className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all text-sm sm:text-base"
                   style={{
                     borderColor: paymentMethod === 'online' ? '#3D2415' : '#D1D5DB',
                     backgroundColor: paymentMethod === 'online' ? '#3D2415' : 'transparent',
@@ -544,7 +544,7 @@ const Cart = () => {
                 </button>
                 <button
                   onClick={() => setPaymentMethod('cash')}
-                  className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all"
+                  className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all text-sm sm:text-base"
                   style={{
                     borderColor: paymentMethod === 'cash' ? '#3D2415' : '#D1D5DB',
                     backgroundColor: paymentMethod === 'cash' ? '#3D2415' : 'transparent',
@@ -558,16 +558,16 @@ const Cart = () => {
           )}
         </div>
 
-        <div className="card mb-6 text-white" style={{ backgroundColor: '#3D2415' }}>
-          <div className="flex justify-between mb-3">
+        <div className="card mb-4 sm:mb-6 text-white" style={{ backgroundColor: '#3D2415' }}>
+          <div className="flex justify-between mb-2 sm:mb-3 text-sm sm:text-base">
             <span>Subtotal:</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-          <div className="flex justify-between mb-3">
+          <div className="flex justify-between mb-2 sm:mb-3 text-sm sm:text-base">
             <span>GST (5%):</span>
             <span>{formatCurrency(gst)}</span>
           </div>
-          <div className="flex justify-between pt-3 border-t border-white border-opacity-30 text-xl font-bold">
+          <div className="flex justify-between pt-3 border-t border-white border-opacity-30 text-lg sm:text-xl font-bold">
             <span>Total Amount:</span>
             <span>{formatCurrency(total)}</span>
           </div>
@@ -577,7 +577,7 @@ const Cart = () => {
           <button
             onClick={handlePlaceOrder}
             disabled={loading}
-            className="w-full text-lg py-4 rounded-lg font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-white"
+            className="w-full text-base sm:text-lg py-3 sm:py-4 rounded-lg font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-white"
             style={{ backgroundColor: '#3D2415' }}
             onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#4D3425')}
             onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#3D2415')}
@@ -587,10 +587,10 @@ const Cart = () => {
         ) : (
           <div className="space-y-4">
             <div className="card bg-yellow-50 border-2 border-yellow-400">
-              <p className="text-center font-semibold text-gray-800">
+              <p className="text-center font-semibold text-gray-800 text-sm sm:text-base">
                 ⚡ Order created! Complete payment to confirm.
               </p>
-              <p className="text-center text-sm text-gray-600 mt-2">
+              <p className="text-center text-xs sm:text-sm text-gray-600 mt-2">
                 Order ID: <span className="font-bold">{createdOrderId}</span>
               </p>
             </div>
