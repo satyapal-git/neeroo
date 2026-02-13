@@ -3,46 +3,45 @@ import api from './api';
 export const authService = {
   // User Auth
   sendUserOTP: async (mobile) => {
+    // api.post already returns { success, message, data } from interceptor
     const response = await api.post('/auth/send-otp', { mobile });
-    return response.data || response; // Handle both response formats
+    return response; // Return full response: { success, message, data }
   },
 
   verifyUserOTP: async (mobile, otp) => {
     const response = await api.post('/auth/verify-otp', { mobile, otp });
-    // Backend returns: { success, message, data: { token, user } }
-    // We need to return: { token, user }
-    return response.data || response;
+    return response; // Return full response: { success, message, data }
   },
 
   updateUserDetails: async (userId, data) => {
     const response = await api.put(`/auth/user/${userId}`, data);
-    return response.data || response;
+    return response;
   },
 
   getUserProfile: async () => {
     const response = await api.get('/auth/profile');
-    return response.data || response;
+    return response;
   },
 
   // Admin Auth
   adminSignup: async (data) => {
     const response = await api.post('/admin/signup', data);
-    return response.data || response;
+    return response;
   },
 
   sendAdminOTP: async (mobile) => {
     const response = await api.post('/admin/send-otp', { mobile });
-    return response.data || response;
+    return response;
   },
 
   verifyAdminOTP: async (mobile, otp) => {
     const response = await api.post('/admin/verify-otp', { mobile, otp });
-    return response.data || response;
+    return response;
   },
 
   getAdminProfile: async () => {
     const response = await api.get('/admin/profile');
-    return response.data || response;
+    return response;
   },
 
   // Common

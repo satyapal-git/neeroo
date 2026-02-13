@@ -6,7 +6,7 @@ const appConfig = require('../config/app.config');
  */
 const apiLimiter = rateLimit({
   windowMs: appConfig.rateLimit.windowMs, // 15 minutes
-  max: appConfig.rateLimit.maxRequests, // 100 requests
+  max: appConfig.nodeEnv === 'development' ? 1000 : appConfig.rateLimit.maxRequests, // ✅ 1000 in dev, 100 in prod
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.',
@@ -20,7 +20,7 @@ const apiLimiter = rateLimit({
  */
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 OTP requests
+  max: appConfig.nodeEnv === 'development' ? 50 : 5, // ✅ 50 in dev, 5 in prod
   message: {
     success: false,
     message: 'Too many OTP requests. Please try again after 15 minutes.',
@@ -33,7 +33,7 @@ const otpLimiter = rateLimit({
  */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 requests
+  max: appConfig.nodeEnv === 'development' ? 100 : 10, // ✅ 100 in dev, 10 in prod
   message: {
     success: false,
     message: 'Too many authentication attempts. Please try again later.',
@@ -45,7 +45,7 @@ const authLimiter = rateLimit({
  */
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // 20 uploads
+  max: appConfig.nodeEnv === 'development' ? 100 : 20, // ✅ 100 in dev, 20 in prod
   message: {
     success: false,
     message: 'Too many upload requests. Please try again later.',

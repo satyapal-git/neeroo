@@ -1,5 +1,6 @@
 const OTP = require('../models/OTP.model');
 const smsService = require('./sms.service');
+const whatsappService = require('./whatsapp.service');
 const { generateOTP } = require('../utils/helpers.util');
 const otpConfig = require('../config/otp.config');
 const appConfig = require('../config/app.config');
@@ -11,10 +12,10 @@ const MESSAGES = require('../constants/messages.constant');
  */
 const sendOTP = async (mobile, type = 'user') => {
   try {
-
     if (!mobile) {
       throw new Error('Mobile number is required for OTP');
     }
+
     // Invalidate any old OTPs for this mobile
     await OTP.invalidateOldOTPs(mobile, type);
 
@@ -33,14 +34,23 @@ const sendOTP = async (mobile, type = 'user') => {
       expiresAt,
     });
 
-    // Send SMS
+    // Prepare message
     const message = type === 'admin' 
       ? otpConfig.templates.adminOTP(otpCode)
       : otpConfig.templates.userOTP(otpCode);
 
-    await smsService.sendSMS(mobile, message);
+    // ✅ Send via WhatsApp
+    try {
+      await whatsappService.sendMessage(mobile, message);
+      logger.info(`✅ OTP sent via WhatsApp to ${mobile} (Type: ${type})`);
+    } catch (whatsappError) {
+      // Fallback to SMS if WhatsApp fails
+      logger.warn(`⚠️ WhatsApp failed, falling back to SMS: ${whatsappError.message}`);
+      await smsService.sendSMS(mobile, message);
+      logger.info(`📱 OTP sent via SMS to ${mobile} (Type: ${type})`);
+    }
+
     console.log("OTP is : ", otpRecord);
-    logger.info(`OTP sent to ${mobile} (Type: ${type})`);
 
     return {
       success: true,
@@ -93,7 +103,6 @@ const verifyOTP = async (mobile, otpCode, type = 'user') => {
         message: MESSAGES.ERROR.INVALID_OTP,
       };
     }
-
 
     // Mark OTP as verified
     otpRecord.verified = true;
