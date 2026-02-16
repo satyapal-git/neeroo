@@ -142,7 +142,7 @@ const AdminLogin = () => {
                 autoFocus
               />
               <p className="text-sm text-gray-500 mt-2 text-center">
-                OTP sent to {mobile}
+                OTP sent to WhatsApp on {mobile}
               </p>
               {timer > 0 && (
                 <p className="text-sm text-gray-600 mt-1 text-center">
