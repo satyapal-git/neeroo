@@ -132,7 +132,7 @@ import { getImageUrl, formatCurrency } from '../../utils/helpers';
 const DishCard = ({ dish }) => {
   const { cart, addToCart, updateQuantity } = useCart();
   const [selectedPortion, setSelectedPortion] = useState(
-    dish.halfPrice && dish.fullPrice ? 'half' : 'half'
+    null
   );
 
   const itemKey = `${dish._id}_${selectedPortion}`;
@@ -198,7 +198,9 @@ const DishCard = ({ dish }) => {
           {dish.halfPrice && dish.fullPrice ? (
             <>
               <button
-                onClick={() => setSelectedPortion('half')}
+                onClick={() => setSelectedPortion(prev =>
+                  prev === 'half' ? null : 'half'
+                )}
                 className={`
                   px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex flex-col items-center min-w-[60px] sm:min-w-[70px]
                   ${selectedPortion === 'half' 
@@ -212,7 +214,9 @@ const DishCard = ({ dish }) => {
               </button>
               
               <button
-                onClick={() => setSelectedPortion('full')}
+                onClick={() => setSelectedPortion(prev =>
+                  prev === 'full' ? null : 'full'
+                )}
                 className={`
                   px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex flex-col items-center min-w-[60px] sm:min-w-[70px]
                   ${selectedPortion === 'full' 
