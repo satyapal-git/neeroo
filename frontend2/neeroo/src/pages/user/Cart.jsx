@@ -542,7 +542,7 @@ const Cart = () => {
           {orderType === ORDER_TYPE.DINE_IN && (
             <div className="mb-4">
               <label className="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">
-                Table Number
+                Table Number and Your Name
               </label>
               <input
                 type="text"
@@ -572,7 +572,7 @@ const Cart = () => {
                 >
                   💳 Online Payment
                 </button>
-                <button
+                {/* <button
                   onClick={() => setPaymentMethod('cash')}
                   className="flex-1 py-3 rounded-lg border-2 font-semibold transition-all text-sm sm:text-base"
                   style={{
@@ -582,7 +582,7 @@ const Cart = () => {
                   }}
                 >
                   💵 Pay at Counter
-                </button>
+                </button> */}
               </div>
             </div>
           )}
