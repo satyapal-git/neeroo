@@ -7,10 +7,10 @@ const StatsCard = ({ icon, label, value, color = 'blue' }) => {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all`}>
-      <div className="text-4xl mb-3">{icon}</div>
-      <div className="text-3xl font-bold mb-1">{value}</div>
-      <div className="text-sm opacity-90">{label}</div>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} text-white p-2 sm:p-4 lg:p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all`}>
+      <div className="text-2xl mb-3">{icon}</div>
+      <div className="text-2xl font-bold mb-1">{value}</div>
+      <div className="text-sm font-bold opacity-90">{label}</div>
     </div>
   );
 };
