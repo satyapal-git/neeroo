@@ -7,8 +7,14 @@ const http = require('http');
 const app = require('./src/app');
 console.log("🔥 SERVER.JS EXECUTED3");
 
+console.log("Before require db");
 const connectDB = require('./src/config/db.config');
+console.log("After require db");
+
+console.log("Before require logger");
 const logger = require('./src/utils/logger.util');
+console.log("After require logger");
+
 const { initializeSocket } = require('./src/utils/socket.util');
 
 const PORT = process.env.PORT || 5000;
