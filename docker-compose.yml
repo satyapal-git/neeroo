@@ -1,0 +1,23 @@
+
+services:
+  backend:
+    build: ./backend2
+    ports:
+      - "5000:5000" # Change the 5000s if your backend runs on a different port
+    env_file:
+      - ./backend2/.env
+    volumes:
+      - ./backend2:/usr/src/app
+      - /usr/src/app/node_modules
+
+  frontend:
+    build: ./frontend2/neeroo
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend2/neeroo/.env
+    volumes:
+      - ./frontend2/neeroo:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Helps Vite hot-reload changes on Windows/Mac
